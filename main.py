@@ -855,7 +855,8 @@ while q < 1:
             lives.write(livetext, font="Impact 20 italic")
              
 #------------------------------------------------------------------------------
-
+#Is this an md5 hash? (maybe md5online.org can help?)
+#bc4b28136c193bc77e758789b27facb0
 
 
         #bomb y coordinate
