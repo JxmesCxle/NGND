@@ -1,14 +1,28 @@
 from multiprocessing import Process
 from playsound import playsound
+from pygame import mixer
+from tkinter import *
 import turtle
 import tkinter
+import keyboard
 import random
 import subprocess
 import sys
 import winsound
 import time
+import os
 global bomba
 global bomb1
+global we
+
+
+mixer.init()
+mixer.music.load("music.wav")
+mixer.music.play(-1)
+
+
+#winsound.PlaySound("music.wav", winsound.SND_ASYNC | winsound.SND_ALIAS )
+
 #packet speed
 pspeed = 2.1
 
@@ -21,6 +35,8 @@ dist = 30
 #bomba = bomb activation
 bomba = 0
 
+we=0
+mm=0
 lk=0
 v=0
 q=0
@@ -46,9 +62,13 @@ height1=650
 win.setup(width=width1 ,height=height1)
 
 #registers pictures
-win.register_shape("virus.gif")
 win.register_shape("hacker.gif")
 win.register_shape("bomb.gif")
+win.register_shape("packet.gif")
+win.register_shape("virus.gif")
+win.register_shape("worm.gif")
+win.register_shape("trojan.gif")
+
 
 #stops screen refreshing
 win.tracer(0)
@@ -56,6 +76,22 @@ win.tracer(0)
 
 #for fullscreen
 #win.setup(width=width1, height=height1)
+
+###START SCREEN###----------------------------------------------------------
+
+startsc=turtle.Turtle()
+startsc.hideturtle()
+startsc.clear()
+startsc.color("green")
+startsc.write("Packet  =  -10Pts\nVirus  =  +10Pts\nTrojan  =  +50Pts\nWorm  =  +500Pts\nHacker x10  =  1Lv\nAdditional Information: Miss A Hacker And Lose A Life!\nBombs Blow Up Everything On Screen!\nThey Also Gain You All The Points From Caught Attacks!\nMake Sure You Use Them Wisely As They Still Subtract -10Pts Per Packet! \n\nPRESS ENTER TO START", font="Impact 15",align = "center")
+
+
+#HIGH SCORES ---------------------------------------------------------------------------------------
+
+
+
+
+
 
 #-----------------------------------------------------------------------------------------------------
 ###HACKER###
@@ -92,7 +128,7 @@ hack.goto(hackx, hacky)
 
 worm = turtle.Turtle()
 worm.speed(0)
-worm.shape("square")
+worm.shape("worm.gif")
 worm.color("orange")
 worm.penup()
 
@@ -123,10 +159,10 @@ packets = []
 while i < 30:
     packet=turtle.Turtle()
     packet.speed(0)
-    packet.shape("circle")
+    packet.shape("packet.gif")
     packet.color("pink")
     packet.penup()
-    packet.goto(10, 300)
+    packet.goto(200, 300)
     packets.append(packet)
     i=i+1
     
@@ -140,7 +176,7 @@ while i < 30:
 
 trojan = turtle.Turtle()
 trojan.speed(0)
-trojan.shape("square")
+trojan.shape("trojan.gif")
 trojan.color("yellow")
 trojan.penup()
 
@@ -168,7 +204,7 @@ trojan.goto(trojanx, trojany)
 
 virus = turtle.Turtle()
 virus.speed(0)
-virus.shape("triangle")
+virus.shape("virus.gif")
 virus.color("red")
 virus.penup()
 
@@ -279,6 +315,16 @@ lives.write(livetext, font="Impact 20 italic")
 
 #===============================================
 
+#high scores----------------------------------------------
+
+high = turtle.Turtle()
+high.hideturtle()
+high.penup()
+high.goto(0, -200)
+high.color("gold")
+
+
+
 
 #----------------------------------------------------------------------------
 
@@ -298,7 +344,10 @@ def space():
         #activates bomb in main loop
         bomba = 1
         
-    
+def start():
+    global we
+    we = 1
+
     
 
 
@@ -307,19 +356,18 @@ win.listen()
 win.onkeypress(left, "Left")
 win.onkeypress(right, "Right")
 win.onkeypress(space, "space")
-
-
+win.onkeypress(start, "KP_Enter")
 
     
 
 ###MAIN CODE###
 
 while q < 1:
-
+    startsc.clear()
     if bomba == 1:
     
         bomb1 = bomb1 - 1
-        dist = 1100
+        dist = 1000
 
         bomba = 0
 
@@ -330,6 +378,7 @@ while q < 1:
         bomb2=str(bomb1)
         bombtext=("Bombs: "+bomb2)
         bombs.write(bombtext, font="Impact 20 italic",align="center")
+
 
     
     #updates movements
@@ -395,6 +444,10 @@ while q < 1:
     if points >= 7500:
         pspeed = 3.6
         hspeed = 3
+
+    if points >= 10000:
+        pspeed = 4
+        hspeed = 3.8
 
 
 
@@ -639,15 +692,36 @@ while q < 1:
 
         #looses a life
         lives1 = lives1 - 1
-
+        winsound.PlaySound("looselife.wav", winsound.SND_ASYNC | winsound.SND_ALIAS )
         #game over
         if lives1 <= 0:
             lives.clear()
             lives.color("white")
             livess=str(lives1)
-            livetext=("Lives: "+livess)
+            livetext=("Lives: "+livess+" ")
             lives.write(livetext, font="Impact 20 italic")
             ###GAMEOVER###
+
+            #checks score and saves it if it is higher
+            hscore = open("scores.txt","r")
+            score1=hscore.read()
+            score2=int(score1)
+            hscore.close()
+
+            if points > score2:
+                hscore = open("scores.txt","w")
+                points2 = str(points)
+                hscore.write(points2)
+                hscore.close()
+                htext1=str(points)
+                htext=str("NEW HIGHSCORE: "+htext1+" ")
+                high.write(htext, font="Impact 20 italic",align="center")
+
+
+                
+            else:
+                htext = str("HIGHSCORE: "+score1+" ")
+                high.write(htext, font="Impact 20 italic",align="center")
 
 
             go = turtle.Turtle()
@@ -656,8 +730,80 @@ while q < 1:
             go.color("red")
             go.clear()
             go.pendown()
-            go.write("GAME OVER", font="Impact 40 italic", align="center")
-            q=1
+            go.write("GAME OVER ", font="Impact 40 italic", align="center")
+            time.sleep(3)
+            go.clear()
+            startsc.goto(0, -50)
+            startsc.clear()
+            startsc.color("white")
+            startsc.write("Packet  =  -10Pts\nVirus  =  +10Pts\nTrojan  =  +50Pts\nWorm  =  +500Pts\nHacker x10  =  1Lv\nAdditional Information: Miss A Hacker And Lose A Life!\nBombs Blow Up Everything On Screen!\nThey Also Gain You All The Points From Caught Attacks!\nMake Sure You Use Them Wisely As They Still Subtract -10Pts Per Packet! \n\nPRESS ENTER TO START", font="Impact 15",align = "center")
+
+
+            #restarts
+            #packet speed
+            pspeed = 2.1
+
+            #hacker speed
+            hspeed = 2
+
+            #distance for collison
+            dist = 30
+
+            #bomba = bomb activation
+            bomba = 0
+
+            we=0
+            mm=0
+            lk=0
+            v=0
+            q=0
+            i=0
+            b=0
+            a=0
+
+            points = 0
+            lives1 = 3
+            bomb1 = 0
+            
+                   
+            
+            #restarts
+            while True:
+                if keyboard.is_pressed("Enter"):
+                    #removes all things in area (NOT WORKING)
+                    packet.clear()
+                    virus.clear()
+                    trojan.clear()
+                    worm.clear()
+                    hack.clear()
+
+                    #clears hscore text
+                    high.clear()
+
+                    
+                    #resets bomb
+                    bombs.clear()
+                    bombs.color("white")
+                    bomb2=str(bomb1)
+                    bombtext=("Bombs: "+bomb2)
+                    bombs.write(bombtext, font="Impact 20 italic",align="center")
+
+                    #resets points
+                    pointd.clear()
+                    pointd.color("white")
+                    pointss=str(points)
+                    pointtext=("Score: "+pointss)
+                    pointd.write(pointtext, font="Impact 20 italic")
+
+
+                    #resets lives
+                    lives.clear()
+                    lives.color("white")
+                    livess=str(lives1)
+                    livetext=("Lives: "+livess)
+                    lives.write(livetext, font="Impact 20 italic")        
+                    break
+                
 
             
 
@@ -738,7 +884,7 @@ while q < 1:
     if bomb.distance(p1) < dist:
 
         #plays bomb grab noise
-        winsound.PlaySound("bombcollect.mp3", winsound.SND_ASYNC | winsound.SND_ALIAS )
+        winsound.PlaySound("bombcollect.wav", winsound.SND_ASYNC | winsound.SND_ALIAS )
 
 
         #chooses new random x coordinate
@@ -762,6 +908,12 @@ while q < 1:
     #ends bomb
     if bomba == 0:
         dist = 30
+
+
+
+
+
+
 
 
 win.mainloop()
