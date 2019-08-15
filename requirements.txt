@@ -1,0 +1,4 @@
+ND
+keyboard==0.13.3
+pygame==1.9.6
+playsound==1.2.2
