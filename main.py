@@ -841,7 +841,7 @@ while q < 1:
             go1.color("white")
             go1.clear()
             go1.pendown()
-            go1.write("YOU GAINED A LIFE", font="Impact 40 italic", align="center")
+            go1.write("YOU GAINED A LIFE ", font="Impact 40 italic", align="center")
             lk = 0
             lives1 = lives1 + 1
             time.sleep(1)
